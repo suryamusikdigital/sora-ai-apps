@@ -190,8 +190,13 @@ Format them EXACTLY like this at the bottom:
     const baseUrl = process.env.AI_SERVER_URL || 'http://localhost:3000';
     console.log(`[DEBUG] Handling chat request. process.env.AI_SERVER_URL: "${process.env.AI_SERVER_URL}", using baseUrl: "${baseUrl}"`);
 
+    let endpointUrl = `${baseUrl}/v1/chat/completions`;
+    if (baseUrl.endsWith('/api') || baseUrl.endsWith('/v1')) {
+      endpointUrl = `${baseUrl}/chat/completions`;
+    }
+
     try {
-      const customResponse = await fetch(`${baseUrl}/api/chat/completions`, {
+      let fetchOptions = {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${customApiKey}`,
@@ -205,7 +210,16 @@ Format them EXACTLY like this at the bottom:
           temperature: 0.7,
           max_tokens: 2048,
         }),
-      });
+      };
+
+      let customResponse = await fetch(endpointUrl, fetchOptions);
+
+      // Fallback for Open WebUI which uses /api/chat/completions
+      if (customResponse.status === 404 && !baseUrl.endsWith('/api') && !baseUrl.endsWith('/v1')) {
+        console.log(`[DEBUG] ${endpointUrl} returned 404. Falling back to /api/chat/completions...`);
+        endpointUrl = `${baseUrl}/api/chat/completions`;
+        customResponse = await fetch(endpointUrl, fetchOptions);
+      }
 
       if (customResponse.ok && customResponse.body) {
         const reader = customResponse.body.getReader();
