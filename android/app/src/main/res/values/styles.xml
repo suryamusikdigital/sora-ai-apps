@@ -5,13 +5,13 @@
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Mengaktifkan mode transparan untuk StatusBar dan NavigationBar -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">#161616</item>
+        <item name="android:navigationBarColor">#161616</item>
         
         <!-- Opsional: Membuat ikon StatusBar menjadi gelap jika latar aplikasi Anda putih/terang -->
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
         <!-- Opsional: Membuat ikon NavigationBar menjadi gelap jika latar aplikasi Anda putih/terang -->
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">

@@ -7,10 +7,6 @@ const config: CapacitorConfig = {
   android: {
     webContentsDebuggingEnabled: true,
     allowMixedContent: true
-  },
-  server: {
-    cleartext: true,
-    // url: 'http://localhost:3001' // Commented out to use bundled files instead of live server
   }
 };
 

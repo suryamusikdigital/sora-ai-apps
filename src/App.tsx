@@ -494,7 +494,6 @@ function App() {
     
     audio.onerror = (e) => {
       console.error('Audio playback error', e);
-      alert('Error memutar audio di perangkat Anda.');
       setPlayingAudioId(null);
     };
 
@@ -578,7 +577,6 @@ function App() {
         return;
       }
       console.error('TTS Error:', err);
-      alert('Gagal memutar suara: ' + err.message);
       setPlayingAudioId(null);
     } finally {
       if (ttsAbortControllerRef.current && !ttsAbortControllerRef.current.signal.aborted) {
@@ -691,6 +689,10 @@ function App() {
   const handleSendMessage = async (promptToSend?: string | any) => {
     const prompt = (typeof promptToSend === 'string' ? promptToSend : text).trim();
     if (!prompt || isLoading) return;
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
 
     if (!currentUser) {
       setAuthBannerMessage('Silakan Masuk atau Daftar Akun terlebih dahulu untuk mulai berkirim pesan dengan SORA AI.');
@@ -869,6 +871,8 @@ function App() {
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
+    e.target.style.height = 'auto';
+    e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
   const handleNewChat = () => {
@@ -899,7 +903,7 @@ function App() {
 
   return (
     <div 
-      className="flex flex-col h-[100dvh] max-h-[100dvh] bg-black text-[#ececec] font-sans overflow-hidden relative touch-pan-y"
+      className="flex flex-col h-[100dvh] max-h-[100dvh] bg-[#161616] text-[#ececec] font-sans overflow-hidden relative touch-pan-y"
     >
       <Sidebar 
         isOpen={isSidebarOpen} 
@@ -977,7 +981,7 @@ function App() {
         </div>
       )}
       {/* Floating Top Header with Credit Balance (Center) and Action Icons (Right) */}
-      <header className="absolute top-0 left-0 right-0 z-20 w-full pointer-events-none bg-gradient-to-b from-black/90 via-black/40 to-transparent pt-[calc(env(safe-area-inset-top)+0.75rem)] sm:pt-[calc(env(safe-area-inset-top)+1rem)] pb-8 px-3 sm:px-4">
+      <header className="absolute top-0 left-0 right-0 z-20 w-full pointer-events-none bg-gradient-to-b from-[#161616]/95 via-[#161616]/60 to-transparent pt-[calc(env(safe-area-inset-top)+0.75rem)] sm:pt-[calc(env(safe-area-inset-top)+1rem)] pb-8 px-3 sm:px-4">
         <div className="w-full max-w-3xl mx-auto flex justify-between items-center pointer-events-auto relative">
           {/* Left: Hamburger & Model Selector */}
           <div className="flex items-center gap-2">
@@ -1052,7 +1056,7 @@ function App() {
       </header>
 
       {/* Main Area / Chat Area */}
-      <main className="flex-1 flex flex-col px-4 pt-[calc(env(safe-area-inset-top)+5rem)] sm:pt-[calc(env(safe-area-inset-top)+6rem)] pb-[calc(env(safe-area-inset-bottom)+12rem)] sm:pb-[calc(env(safe-area-inset-bottom)+13rem)] overflow-y-auto overscroll-none w-full max-w-3xl mx-auto custom-scrollbar">
+      <main className="flex-1 flex flex-col px-4 pt-[calc(env(safe-area-inset-top)+5rem)] sm:pt-[calc(env(safe-area-inset-top)+6rem)] pb-28 sm:pb-32 overflow-y-auto overscroll-none w-full max-w-3xl mx-auto custom-scrollbar">
         {messages.length > 0 && (
           <div className="flex-1 space-y-2.5 sm:space-y-4 py-1 sm:py-2">
             {messages.map((msg, idx) => (
@@ -1069,9 +1073,9 @@ function App() {
                 ) : (
                   <div
                     className={`min-w-0 px-4 py-2.5 sm:px-5 sm:py-3 text-base sm:text-lg leading-relaxed break-words [overflow-wrap:anywhere] ${
-                      msg.role === 'user'
-                        ? 'max-w-[88%] sm:max-w-[80%] bg-[#212121] text-white rounded-tl-none rounded-bl-2xl rounded-tr-2xl rounded-br-none shadow'
-                        : 'w-full bg-black text-white/90 rounded-2xl rounded-bl-none shadow'
+                      msg.role === 'user' 
+                        ? 'w-fit max-w-[85%] sm:max-w-[75%] self-end bg-[#262626] text-white rounded-2xl rounded-tl-none rounded-br-none shadow border border-white/5' 
+                        : 'w-full bg-transparent text-white/90 rounded-2xl rounded-bl-none'
                     }`}
                   >
                     {msg.role === 'user' ? (
@@ -1192,9 +1196,9 @@ function App() {
                 
                 {/* Suggestions Block */}
                 {msg.role === 'assistant' && msg.content && msg.content.includes('---SUGGESTIONS---') && (!isLoading || idx < messages.length - 1) && (
-                  <div className="flex flex-col gap-2.5 mt-7 pl-4 sm:pl-5 pb-1">
+                  <div className="flex flex-col gap-2 mt-4 pl-4 sm:pl-5 pb-1">
                     <span className="text-white/80 text-xs sm:text-sm font-medium tracking-wide">Follow up</span>
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-2.5">
                       {msg.content.split('---SUGGESTIONS---')[1]
                         .split('\n')
                         .map(line => line.trim())
@@ -1210,9 +1214,10 @@ function App() {
                               e.stopPropagation();
                               handleSendMessage(suggestion);
                             }}
-                            className="text-xs sm:text-sm text-white/50 hover:text-white/80 transition-all text-left cursor-pointer break-words [overflow-wrap:anywhere]"
+                            className="group flex items-start gap-2 text-xs sm:text-sm text-white/50 hover:text-white/80 transition-all text-left cursor-pointer break-words [overflow-wrap:anywhere]"
                           >
-                            {suggestion}
+                            <span className="mdi mdi-forum-outline text-base leading-none mt-[1px] opacity-70 group-hover:opacity-100 transition-opacity shrink-0"></span>
+                            <span className="leading-snug">{suggestion}</span>
                           </button>
                         ))}
                     </div>
@@ -1250,7 +1255,7 @@ function App() {
       </main>
 
       {/* Floating Bottom Input Area */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 w-full pointer-events-none bg-gradient-to-t from-black/95 via-black/60 to-transparent pt-10 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[calc(env(safe-area-inset-bottom)+1.25rem)] px-3 sm:px-4">
+      <div className="absolute bottom-0 left-0 right-0 z-20 w-full pointer-events-none bg-gradient-to-t from-[#161616]/95 via-[#161616]/60 to-transparent pt-10 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[calc(env(safe-area-inset-bottom)+1.25rem)] px-3 sm:px-4">
         <div className="w-full max-w-3xl mx-auto pointer-events-auto">
           
           {/* Mini Waveform when AI is speaking */}
@@ -1272,55 +1277,65 @@ function App() {
             </div>
           )}
 
-          <div className="relative flex items-center bg-[#1a1a1a] border border-white/10 rounded-full px-2 sm:px-3 py-1.5 sm:py-2 transition-colors shadow-lg">
+          <div className="relative flex flex-col bg-[#1d1d1d] border border-white/10 rounded-[20px] p-3 sm:p-4 transition-colors shadow-lg">
           
-          <button
-            type="button"
-            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 shrink-0 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
-            title="Tambah Lampiran"
-          >
-            <span className="mdi mdi-plus text-2xl leading-none"></span>
-          </button>
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Kirim Pesan"
+              rows={1}
+              className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm sm:text-base text-white placeholder-white/40 resize-none max-h-48 overflow-y-auto leading-relaxed custom-scrollbar disabled:opacity-50 pt-1 sm:pt-2"
+              disabled={isLoading}
+            />
 
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            placeholder="Ketik perintah..."
-            rows={1}
-            disabled={isLoading}
-            className="flex-1 bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm sm:text-base text-white placeholder-white/40 py-[3px] px-2 sm:py-[5px] resize-none max-h-36 overflow-y-auto leading-relaxed custom-scrollbar disabled:opacity-50"
-          />
+            <div className="flex items-center justify-between w-full mt-2">
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 shrink-0 text-white/80 hover:text-white rounded-full transition-colors cursor-pointer"
+                  title="Tambah Lampiran"
+                >
+                  <span className="mdi mdi-plus text-[28px] leading-none"></span>
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 shrink-0 text-white/80 hover:text-white rounded-full transition-colors cursor-pointer"
+                  title="Menu"
+                >
+                  <span className="mdi mdi-view-dashboard-outline text-[26px] leading-none"></span>
+                </button>
+              </div>
 
-          <div className="flex items-center gap-1 shrink-0 mr-0.5 sm:mr-1">
-
-            {isLoading ? (
-              <button
-                type="button"
-                onClick={handleStopGeneration}
-                className="p-1.5 sm:p-2.5 rounded-full transition-all bg-white text-black hover:bg-gray-200 cursor-pointer shadow-md flex items-center justify-center"
-                title="Hentikan respon"
-              >
-                <Square className="w-4 h-4 fill-black text-black" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => handleSendMessage()}
-                disabled={!text.trim()}
-                className={`p-1.5 sm:p-2.5 rounded-full transition-all bg-white text-black ${
-                  text.trim()
-                    ? 'hover:bg-gray-200 cursor-pointer shadow-md'
-                    : 'cursor-not-allowed opacity-60'
-                }`}
-                title="Kirim pesan"
-              >
-                <ArrowUp className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.5]" />
-              </button>
-            )}
-          </div>
-          {/* Modal Fitur & Harga */}
+              <div className="flex items-center gap-1 shrink-0">
+                {isLoading ? (
+                  <button
+                    type="button"
+                    onClick={handleStopGeneration}
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all bg-white/20 text-white hover:bg-white/30 cursor-pointer flex items-center justify-center"
+                    title="Hentikan respon"
+                  >
+                    <Square className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleSendMessage()}
+                    disabled={!text.trim()}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all flex items-center justify-center bg-white text-black ${
+                      text.trim()
+                        ? 'hover:bg-gray-200 cursor-pointer'
+                        : 'cursor-not-allowed'
+                    }`}
+                    title="Kirim pesan"
+                  >
+                    <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>{/* Modal Fitur & Harga */}
           {showFeaturePricing && (
             <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowFeaturePricing(false)}></div>
@@ -1516,7 +1531,6 @@ function App() {
           )}
         </div>
       </div>
-    </div>
     </div>
   );
 }
