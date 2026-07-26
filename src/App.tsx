@@ -178,6 +178,7 @@ function App() {
 
   // Notes State
   const [notes, setNotes] = useState<Note[]>([]);
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
   
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -1459,9 +1460,27 @@ function App() {
                           </div>
 
                           {/* Content inside the card */}
-                          <div className="text-white/90 text-sm sm:text-base leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto custom-scrollbar">
+                          <div className={`text-white/90 text-sm sm:text-base leading-relaxed whitespace-pre-wrap overflow-hidden transition-all duration-300 ${expandedNotes.has(note.id) ? '' : 'line-clamp-4 max-h-32'}`}>
                             {note.content}
                           </div>
+
+                          {/* Expand/Collapse Button */}
+                          {(note.content.length > 200 || note.content.split('\n').length > 4) && (
+                            <button 
+                              onClick={() => {
+                                setExpandedNotes(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(note.id)) next.delete(note.id);
+                                  else next.add(note.id);
+                                  return next;
+                                });
+                              }}
+                              className="mt-2 pt-2 border-t border-white/10 text-xs text-white/50 hover:text-white/80 flex items-center justify-center gap-1 w-full transition-colors"
+                            >
+                              <span>{expandedNotes.has(note.id) ? 'Tampilkan Lebih Sedikit' : 'Tampilkan Seluruhnya'}</span>
+                              <span className={`mdi ${expandedNotes.has(note.id) ? 'mdi-chevron-up' : 'mdi-chevron-down'} text-sm`}></span>
+                            </button>
+                          )}
 
                         </div>
                       </div>
