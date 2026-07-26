@@ -104,7 +104,9 @@ const CodeBlock = ({ className, children, ...props }: any) => {
   );
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Auto-detect if we are running on the web vs Android
+const isWebProduction = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+const API_URL = isWebProduction ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
 
 const copyToClipboard = async (text: string) => {
   if (navigator.clipboard && window.isSecureContext) {
