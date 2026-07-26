@@ -187,8 +187,10 @@ Format them EXACTLY like this at the bottom:
 
     const customApiKey = process.env.CUSTOM_AI_API_KEY;
 
+    const baseUrl = process.env.AI_SERVER_URL || 'http://localhost:3000';
+    console.log(`[DEBUG] Handling chat request. process.env.AI_SERVER_URL: "${process.env.AI_SERVER_URL}", using baseUrl: "${baseUrl}"`);
+
     try {
-      const baseUrl = process.env.AI_SERVER_URL || 'http://localhost:3000';
       const customResponse = await fetch(`${baseUrl}/api/chat/completions`, {
         method: 'POST',
         headers: {
