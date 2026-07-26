@@ -196,37 +196,47 @@ Format them EXACTLY like this at the bottom:
     }
 
     try {
-      // Map UI models to LM Studio JIT models
+      // Map UI models to partial LM Studio identifiers
       const modelMapping: Record<string, string> = {
-        'sora-prime-1.5-pro-fast': 'qwen2.5',
-        'sora-gen12-preview': 'llama-3.1',
+        'sora-prime-1.5-pro-fast': 'qwen',
+        'sora-gen12-preview': 'llama',
       };
 
-      let actualModel = modelMapping[model] || model;
-      const isMapped = !!modelMapping[model];
+      let actualModel = model;
+      let searchKey = modelMapping[model] || null;
       
-      // Only auto-detect if the model wasn't mapped specifically for JIT loading
-      if (!isMapped) {
-        try {
-          let modelsEndpointUrl = `${baseUrl}/v1/models`;
-          if (baseUrl.endsWith('/api') || baseUrl.endsWith('/v1')) {
-            modelsEndpointUrl = `${baseUrl}/models`;
-          }
-          const modelsRes = await fetch(modelsEndpointUrl, {
-             headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${customApiKey}` }
-          });
-          if (modelsRes.ok) {
-             const modelsData = await modelsRes.json();
-             if (modelsData?.data && modelsData.data.length > 0) {
-                actualModel = modelsData.data[0].id;
-                console.log(`[DEBUG] Auto-detected loaded model: ${actualModel}`);
-             }
-          }
-        } catch (err) {
-           console.log(`[DEBUG] Could not auto-detect models from server. Using fallback: ${actualModel}`);
+      // Auto-detect LM Studio models to avoid "model_not_found" error
+      try {
+        let modelsEndpointUrl = `${baseUrl}/v1/models`;
+        if (baseUrl.endsWith('/api') || baseUrl.endsWith('/v1')) {
+          modelsEndpointUrl = `${baseUrl}/models`;
         }
-      } else {
-        console.log(`[DEBUG] Using JIT mapped model: ${actualModel}`);
+        const modelsRes = await fetch(modelsEndpointUrl, {
+           headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${customApiKey}` }
+        });
+        if (modelsRes.ok) {
+           const modelsData = await modelsRes.json();
+           if (modelsData?.data && modelsData.data.length > 0) {
+              // If we have a mapped search key (e.g. 'llama'), find the exact full model ID
+              if (searchKey) {
+                 const matched = modelsData.data.find((m: any) => m.id.toLowerCase().includes(searchKey!.toLowerCase()));
+                 if (matched) {
+                    actualModel = matched.id;
+                    console.log(`[DEBUG] Found matching JIT model for '${searchKey}': ${actualModel}`);
+                 } else {
+                    // Fallback to first available if not found
+                    actualModel = modelsData.data[0].id;
+                    console.log(`[DEBUG] No model found for '${searchKey}', using fallback: ${actualModel}`);
+                 }
+              } else {
+                 // No mapping, just use the first loaded model
+                 actualModel = modelsData.data[0].id;
+                 console.log(`[DEBUG] Auto-detected first loaded model: ${actualModel}`);
+              }
+           }
+        }
+      } catch (err) {
+         console.log(`[DEBUG] Could not auto-detect models from server. Using fallback: ${actualModel}`);
       }
 
       let fetchOptions = {
