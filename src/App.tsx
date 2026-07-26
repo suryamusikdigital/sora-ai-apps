@@ -147,7 +147,8 @@ function App() {
   const [showPromptMenu, setShowPromptMenu] = useState(true);
   const [availableModels, setAvailableModels] = useState<any[]>([
     { id: 'sora-prime-1.5-pro-fast', name: 'Sora Prime 1.5 Pro-Fast' },
-    { id: 'sora-gen12-preview', name: 'Sora Gen12 Preview' }
+    { id: 'sora-gen12-preview', name: 'Sora Gen12 Preview' },
+    { id: 'sora-one-1.1', name: 'Sora One 1.1' }
   ]);
   const [selectedModel, setSelectedModel] = useState<string>('sora-prime-1.5-pro-fast');
   

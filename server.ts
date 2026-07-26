@@ -200,6 +200,7 @@ Format them EXACTLY like this at the bottom:
       const modelMapping: Record<string, string> = {
         'sora-prime-1.5-pro-fast': 'qwen',
         'sora-gen12-preview': 'llama',
+        'sora-one-1.1': 'gemma'
       };
 
       let actualModel = model;
