@@ -197,6 +197,7 @@ Format them EXACTLY like this at the bottom:
         headers: {
           'Authorization': `Bearer ${customApiKey}`,
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           model: model,
@@ -490,7 +491,8 @@ app.get('/api/models', async (req, res) => {
     const baseUrl = process.env.AI_SERVER_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/models`, {
       headers: {
-        'Authorization': `Bearer ${customApiKey}`
+        'Authorization': `Bearer ${customApiKey}`,
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     if (!response.ok) throw new Error('Failed to fetch models');
