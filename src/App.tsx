@@ -1012,7 +1012,7 @@ function App() {
                               setIsModelDropdownOpen(false);
                             }}
                             className={`flex items-center justify-between px-3 py-2 text-base sm:text-lg text-left rounded-lg transition-colors cursor-pointer ${
-                              selectedModel === m.id ? 'bg-white/10 text-white font-normal' : 'text-white/70 hover:bg-white/5'
+                              selectedModel === m.id ? 'text-white font-normal' : 'text-white/70 hover:bg-white/5'
                             }`}
                           >
                             <span className="truncate pr-4 capitalize">{m.id.replace(/-/g, ' ')}</span>
@@ -1439,6 +1439,22 @@ function App() {
                               <span>{new Date(note.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</span>
                             </div>
                             <div className="flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                              {(note.content.length > 200 || note.content.split('\n').length > 4) && (
+                                <button
+                                  onClick={() => {
+                                    setExpandedNotes(prev => {
+                                      const next = new Set(prev);
+                                      if (next.has(note.id)) next.delete(note.id);
+                                      else next.add(note.id);
+                                      return next;
+                                    });
+                                  }}
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-all cursor-pointer"
+                                  title={expandedNotes.has(note.id) ? "Perkecil Catatan" : "Perbesar Catatan"}
+                                >
+                                  <span className={`mdi ${expandedNotes.has(note.id) ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'} text-lg`}></span>
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleCopy(note.id, note.content)}
                                 className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-all cursor-pointer"
@@ -1466,22 +1482,7 @@ function App() {
                           </div>
 
                           {/* Expand/Collapse Button */}
-                          {(note.content.length > 200 || note.content.split('\n').length > 4) && (
-                            <button 
-                              onClick={() => {
-                                setExpandedNotes(prev => {
-                                  const next = new Set(prev);
-                                  if (next.has(note.id)) next.delete(note.id);
-                                  else next.add(note.id);
-                                  return next;
-                                });
-                              }}
-                              className="mt-2 pt-2 border-t border-white/10 text-xs text-white/50 hover:text-white/80 flex items-center justify-center gap-1 w-full transition-colors"
-                            >
-                              <span>{expandedNotes.has(note.id) ? 'Tampilkan Lebih Sedikit' : 'Tampilkan Seluruhnya'}</span>
-                              <span className={`mdi ${expandedNotes.has(note.id) ? 'mdi-chevron-up' : 'mdi-chevron-down'} text-sm`}></span>
-                            </button>
-                          )}
+
 
                         </div>
                       </div>
