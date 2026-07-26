@@ -196,26 +196,37 @@ Format them EXACTLY like this at the bottom:
     }
 
     try {
-      let actualModel = model;
+      // Map UI models to LM Studio JIT models
+      const modelMapping: Record<string, string> = {
+        'sora-prime-1.5-pro-fast': 'qwen2.5',
+        'sora-gen12-preview': 'llama-3.1',
+      };
+
+      let actualModel = modelMapping[model] || model;
+      const isMapped = !!modelMapping[model];
       
-      // Auto-detect LM Studio model to avoid "model_not_found" error
-      try {
-        let modelsEndpointUrl = `${baseUrl}/v1/models`;
-        if (baseUrl.endsWith('/api') || baseUrl.endsWith('/v1')) {
-          modelsEndpointUrl = `${baseUrl}/models`;
+      // Only auto-detect if the model wasn't mapped specifically for JIT loading
+      if (!isMapped) {
+        try {
+          let modelsEndpointUrl = `${baseUrl}/v1/models`;
+          if (baseUrl.endsWith('/api') || baseUrl.endsWith('/v1')) {
+            modelsEndpointUrl = `${baseUrl}/models`;
+          }
+          const modelsRes = await fetch(modelsEndpointUrl, {
+             headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${customApiKey}` }
+          });
+          if (modelsRes.ok) {
+             const modelsData = await modelsRes.json();
+             if (modelsData?.data && modelsData.data.length > 0) {
+                actualModel = modelsData.data[0].id;
+                console.log(`[DEBUG] Auto-detected loaded model: ${actualModel}`);
+             }
+          }
+        } catch (err) {
+           console.log(`[DEBUG] Could not auto-detect models from server. Using fallback: ${actualModel}`);
         }
-        const modelsRes = await fetch(modelsEndpointUrl, {
-           headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${customApiKey}` }
-        });
-        if (modelsRes.ok) {
-           const modelsData = await modelsRes.json();
-           if (modelsData?.data && modelsData.data.length > 0) {
-              actualModel = modelsData.data[0].id;
-              console.log(`[DEBUG] Auto-detected loaded model: ${actualModel}`);
-           }
-        }
-      } catch (err) {
-         console.log(`[DEBUG] Could not auto-detect models from server. Using fallback: ${actualModel}`);
+      } else {
+        console.log(`[DEBUG] Using JIT mapped model: ${actualModel}`);
       }
 
       let fetchOptions = {
