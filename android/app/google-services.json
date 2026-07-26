@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "508339520020",
+    "firebase_url": "https://sora-ai-1aa56-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sora-ai-1aa56",
+    "storage_bucket": "sora-ai-1aa56.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508339520020:android:f2810cf1f557d532631d01",
+        "android_client_info": {
+          "package_name": "com.sora.ai.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDf0i2RTVardvVTvbWe0qdJLVupdG1XlbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

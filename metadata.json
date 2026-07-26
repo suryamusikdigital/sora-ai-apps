@@ -1,0 +1,6 @@
+{
+  "name": "DevOps ChatGPT AI",
+  "description": "ChatGPT-style AI Assistant for DevOps Engineering, Cloud Infrastructure, and Real-time Third-Party API Integrations powered by Gemini LLM",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
