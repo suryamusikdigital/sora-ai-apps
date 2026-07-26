@@ -517,25 +517,50 @@ function App() {
       
       ttsAbortControllerRef.current = new AbortController();
 
-      const res = await fetch(`${API_URL}/api/tts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(secret ? { 'x-api-secret': secret } : {})
-        },
-        body: JSON.stringify({ text: cleanContent, voice: selectedVoice }),
-        signal: ttsAbortControllerRef.current.signal
-      });
-      
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status}. Pastikan server sudah di-restart!`);
+      let res: Response | null = null;
+      let blob: Blob | null = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+      let lastError: any = null;
+
+      while (retryCount < maxRetries) {
+        try {
+          res = await fetch(`${API_URL}/api/tts`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(secret ? { 'x-api-secret': secret } : {})
+            },
+            body: JSON.stringify({ text: cleanContent, voice: selectedVoice }),
+            signal: ttsAbortControllerRef.current.signal
+          });
+          
+          if (!res.ok) {
+            throw new Error(`Server error: ${res.status}. Pastikan server sudah di-restart!`);
+          }
+          
+          blob = await res.blob();
+          if (!blob.type.includes('audio')) {
+             throw new Error('Respon bukan file audio. Pastikan backend baru jalan.');
+          }
+          
+          // Berhasil, keluar dari loop
+          break;
+        } catch (err: any) {
+          if (err.name === 'AbortError') throw err;
+          lastError = err;
+          retryCount++;
+          console.warn(`TTS attempt ${retryCount} failed:`, err);
+          if (retryCount >= maxRetries) {
+            throw err;
+          }
+          // Tunggu sebentar sebelum mencoba lagi (backoff)
+          await new Promise(resolve => setTimeout(resolve, 500 * retryCount));
+        }
       }
       
-      const blob = await res.blob();
-      if (!blob.type.includes('audio')) {
-         throw new Error('Respon bukan file audio. Pastikan backend baru jalan.');
-      }
-      
+      if (!blob) throw lastError;
+
       const url = URL.createObjectURL(blob);
       
       audio.src = url;
