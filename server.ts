@@ -1,10 +1,7 @@
 import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
-import cors from 'cors';
-import { createServer as createViteServer } from 'vite';
-
-dotenv.config();
+import cors from 'cors';dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
@@ -515,6 +512,7 @@ async function startServer() {
   }
 
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
