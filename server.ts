@@ -196,6 +196,28 @@ Format them EXACTLY like this at the bottom:
     }
 
     try {
+      let actualModel = model;
+      
+      // Auto-detect LM Studio model to avoid "model_not_found" error
+      try {
+        let modelsEndpointUrl = `${baseUrl}/v1/models`;
+        if (baseUrl.endsWith('/api') || baseUrl.endsWith('/v1')) {
+          modelsEndpointUrl = `${baseUrl}/models`;
+        }
+        const modelsRes = await fetch(modelsEndpointUrl, {
+           headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${customApiKey}` }
+        });
+        if (modelsRes.ok) {
+           const modelsData = await modelsRes.json();
+           if (modelsData?.data && modelsData.data.length > 0) {
+              actualModel = modelsData.data[0].id;
+              console.log(`[DEBUG] Auto-detected loaded model: ${actualModel}`);
+           }
+        }
+      } catch (err) {
+         console.log(`[DEBUG] Could not auto-detect models from server. Using fallback: ${actualModel}`);
+      }
+
       let fetchOptions = {
         method: 'POST',
         headers: {
@@ -204,7 +226,7 @@ Format them EXACTLY like this at the bottom:
           'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
-          model: model,
+          model: actualModel,
           messages: formattedMessages,
           stream: true,
           temperature: 0.7,
